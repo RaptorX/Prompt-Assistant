@@ -1,0 +1,5 @@
+#SingleInstance
+
+class Main {
+
+}
