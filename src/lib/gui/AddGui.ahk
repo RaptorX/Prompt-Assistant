@@ -9,8 +9,9 @@
 		basicBtnLoc := basicWidth + AddGui.gui.MarginX * 2 - (75 * 2)
 	
 		AddGui.gui.b64Icon := ''
-		AddGui.gui.AddPicture('vIcon x+160 ym w64 h-1', AddGui.placeholder)
-		AddGui.gui.AddButton('x+5 yp+40', 'Change Icon').OnEvent('Click', (*)=>AddGui.PickIcon())
+		AddGui.gui.AddGroupBox('x+' (basicWidth/2) - (75/2) ' ym w75 r3.5 Section','Icon')
+		AddGui.gui.AddPicture('vIcon xp+6 yp+17 w64 h-1', AddGui.placeholder)
+		AddGui.gui.AddButton('xs y+15 w75', 'Change Icon').OnEvent('Click', (*)=>AddGui.PickIcon())
 		AddGui.gui.AddGroupBox('xm y+m w' basicWidth + AddGui.gui.MarginX*2 ' r1','Type')
 		AddGui.gui.AddRadio('vType xp10 yp+15 Checked','Text').OnEvent('Click', (*)=> AddGui.CtrlStatusHandler())
 		AddGui.gui.AddRadio('x+m','Submenu').OnEvent('Click', (*)=> AddGui.CtrlStatusHandler())
