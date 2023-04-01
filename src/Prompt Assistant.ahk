@@ -1,4 +1,4 @@
-#SingleInstance
+﻿#SingleInstance
 
 #Include <SQLite\SQLite3>
 
@@ -6,6 +6,10 @@
 #Include <HandleFromBase64\HandleFromBase64>
 
 #Include <Notify>
+#Include <gui\AddGui>
+
+; TODO: Export only selected
+
 TraySetIcon 'res\ico\PA.ico'
 
 class Main {
