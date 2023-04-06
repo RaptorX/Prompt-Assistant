@@ -1,4 +1,4 @@
-﻿class AddGui {
+class AddGui {
 	static gui         := Gui('+ToolWindow +Owner' Main.gui.hwnd,'Add Item')
 	static editing     := false
 	static placeholder := 'res\ico\002-txt-1.ico'
@@ -63,7 +63,7 @@
 
 	static Save()
 	{
-		static lvInfo  := Main.lvInfo
+		static db      := Main.db
 		static tvInfo  := Main.tvInfo
 		static tvpInfo := Main.tvpInfo
 
@@ -96,7 +96,7 @@
 
 		b64Icon := item[8] := AddGui.gui.b64Icon
 
-		lvInfo.Set(item[6], item)
+		Main.lvInfo.Set(item[6], item)
 
 		icon_index := IL_Add(Main.Icon.list, 'HBITMAP:' HandleFromBase64(b64Icon, false))
 		Main.Icon.data.Set(item[6], icon_index ?? -1)
@@ -122,7 +122,7 @@
 		else
 		{
 			pos := 0
-			for itemId, row in lvInfo
+			for itemId, row in Main.lvInfo
 				if row[7] = parentInfo.id
 					pos++
 			item[9] := pos
@@ -143,14 +143,22 @@
 					'Expand Icon' Main.Icon.data[item[6]]
 				)
 
+				SQL := "SELECT id,label,parent,b64icon FROM items WHERE type='MENU' "
+				    .  "AND parent=" AddGui.editing.id " ORDER BY parent,pos ASC"
+				
+				try table := db.Exec(SQL)
+				catch
+					throw Error(db.errMsg, A_ThisFunc)
+				
+				Main.LoadTree(table, tvID)
+				
 				if AddGui.editing.row
 					Main.gui['menu'].Delete(AddGui.editing.row)
+				
 				pos := 0
-				for itemId, row in lvInfo
-				{
+				for itemId, row in Main.lvInfo
 					if row[7] = item[7]
 						pos++
-				}
 				item[9] := pos
 			}
 			else
@@ -183,7 +191,6 @@
 		targetName := path[path.Length]
 		for item in path
 		{
-			OutputDebug item '`n'
 			while tvID := Main.gui['smTree'].GetNext(tvID ?? 0, 'Full')
 				if item = Main.gui['smTree'].GetText(tvID)
 					id := tvID

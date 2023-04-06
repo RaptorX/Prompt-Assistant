@@ -68,7 +68,7 @@ class Main {
 
 		lvWidth := 650
 		tvWidth := lvWidth / 4
-		
+
 		Main.gui.AddText('ym w' tvWidth ' Section', 'Submenus:')
 		Main.gui.SetFont('', 'Arial')
 		Main.gui.AddTreeView('vsmTree w' tvWidth ' h400 -Buttons')
@@ -265,7 +265,7 @@ class Main {
 		db.Exec('COMMIT TRANSACTION;')
 		Main.loadView()
 		Main.LoadMenu()
-		
+
 		Notify.Show('Menu Saved.', 'Success', 0x52efac)
 	}
 
@@ -559,6 +559,56 @@ class Main {
 		return parent.menu
 	}
 
+	static LoadTree(table, new_parent?)
+	{
+		Main.gui['smTree'].Opt('-Redraw')
+		loop table.nRows
+		{
+			icon_index := unset
+			id := table.cell[A_Index, 'id']
+			if b64icon := table.cell[A_Index, 'b64Icon']
+			{
+				if Main.Icon.data.Has(id)
+					icon_index := Main.Icon.data[id]
+				else
+					icon_index := IL_Add(Main.Icon.list, 'HICON:' HandleFromBase64(b64icon))
+			}
+
+			parent := new_parent ?? Main.tvInfo[table.cell[A_Index, 'parent']]
+			label := table.cell[A_Index, 'label']
+
+			tvID := Main.gui['smTree'].Add(label, parent,'Expand Icon' (icon_index ?? -1))
+
+			Main.tvInfo.Set(id, tvID)
+			Main.tvpInfo.Set(tvID, id)
+			Main.Icon.data.Set(id, icon_index ?? -1)
+		}
+		Main.gui['smTree'].Opt('+Redraw')
+	}
+
+	static LoadList(table)
+	{
+		Main.gui['menu'].Opt('-Redraw')
+		Main.gui['menu'].Delete()
+		loop table.nRows
+		{
+			icon_index := unset
+			id := table.cell[A_Index, 'id']
+			; hk := table.cell[A_Index, 'hotkey']
+			if b64icon := table.cell[A_Index, 'b64icon']
+				icon_index := IL_Add(Main.Icon.list, 'HICON:' HandleFromBase64(b64icon))
+
+			table.rows[A_Index][table.header['hotkey']] := Main.HKToString(table.cell[A_Index, 'hotkey'])
+			Main.lvInfo.Set(id, table.rows[A_Index])
+
+			pos := Main.gui['menu'].Add('Icon' (icon_index ?? -1), table.rows[A_Index]*)
+			Main.Icon.data.Set(id, icon_index ?? -1)
+		}
+
+		Main.AutoFitColumns()
+		Main.gui['menu'].Opt('+Redraw')
+	}
+
 	static loadView()
 	{
 		static db      := Main.db
@@ -577,54 +627,14 @@ class Main {
 		catch
 			throw Error(db.errMsg, A_ThisFunc)
 
-		Main.gui['smTree'].Opt('-Redraw')
-		loop table.nRows
-		{
-			icon_index := unset
-			id := table.cell[A_Index, 'id']
-			if b64icon := table.cell[A_Index, 'b64Icon']
-				icon_index := IL_Add(Main.Icon.list, 'HICON:' HandleFromBase64(b64icon))
-
-			parent := tvInfo[table.cell[A_Index, 'parent']]
-			label := table.cell[A_Index, 'label']
-
-			tvID := Main.gui['smTree'].Add(label, parent,'Expand Icon' (icon_index ?? -1))
-			tvInfo.Set(id, tvID)
-			tvpInfo.Set(tvID, id)
-			Main.Icon.data.Set(id, icon_index ?? -1)
-		}
-		Main.gui['smTree'].Opt('+Redraw')
-
+		Main.LoadTree(table)
 
 		SQL := "SELECT * FROM items WHERE parent=0 ORDER BY parent,pos ASC"
 		try table := db.Exec(SQL)
 		catch
 			throw Error(db.errMsg, A_ThisFunc)
 
-		Main.gui['menu'].Opt('-Redraw')
-		Main.gui['menu'].Delete()
-		loop table.nRows
-		{
-			icon_index := unset
-			id := table.cell[A_Index, 'id']
-			; hk := table.cell[A_Index, 'hotkey']
-			if b64icon := table.cell[A_Index, 'b64icon']
-				icon_index := IL_Add(Main.Icon.list, 'HICON:' HandleFromBase64(b64icon))
-
-			table.rows[A_Index][table.header['hotkey']] := Main.HKToString(table.cell[A_Index, 'hotkey'])
-			lvInfo.Set(id, table.rows[A_Index])
-
-			pos := Main.gui['menu'].Add('Icon' (icon_index ?? -1), table.rows[A_Index]*)
-			; if table.cell[A_Index, 'pos'] != pos
-			; {
-			; 	table.rows[A_Index][table.header['pos']] := pos
-			; 	Main.gui['menu'].Modify(pos, '', table.rows[A_Index]*)
-			; }
-			Main.Icon.data.Set(id, icon_index ?? -1)
-		}
-
-		Main.AutoFitColumns()
-		Main.gui['menu'].Opt('+Redraw')
+		Main.LoadList(table)
 
 		SQL := "SELECT * FROM items WHERE parent is not 0 ORDER BY parent,pos ASC"
 		try table := db.Exec(SQL)
@@ -688,7 +698,7 @@ class Main {
 
 		if !tvItem
 			return
-		
+
 		Main.gui['smTree'].Opt('+Redraw')
 		Main.gui['menu'].Opt('-Redraw')
 		Main.gui['menu'].Delete()
@@ -853,7 +863,7 @@ menuHandler(ItemName, ItemPos, MyMenu)
 
 	if ItemName = 'Customize'
 		return Main.gui.Show()
-	
+
 	SQL := "SELECT type,parent,snippet FROM items WHERE label='" RegExReplace(ItemName, '`t.*') "'"
 
 	items := db.Exec(SQL)
