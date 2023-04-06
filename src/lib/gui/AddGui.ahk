@@ -1,4 +1,4 @@
-class AddGui {
+﻿class AddGui {
 	static gui         := Gui('+ToolWindow +Owner' Main.gui.hwnd,'Add Item')
 	static editing     := false
 	static placeholder := 'res\ico\002-txt-1.ico'
@@ -164,7 +164,7 @@ class AddGui {
 			tvpInfo.Set(tvID, item[6])
 		}
 
-		Main.Reset()
+		Main.ResetTriggers()
 		Main.ResetPos()
 		Main.LoadMenu()
 		Main.AutoFitColumns()

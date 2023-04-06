@@ -1,4 +1,4 @@
-﻿#SingleInstance
+#SingleInstance
 
 #Include <SQLite\SQLite3>
 
@@ -239,7 +239,7 @@ class Main {
 		static tvInfo := Main.tvInfo
 		static SQL := "INSERT OR REPLACE INTO items VALUES({});"
 
-		Main.Reset()
+		Main.ResetTriggers()
 		db.Exec('BEGIN TRANSACTION;')
 		db.Exec('DELETE FROM items;')
 		for id,item in lvInfo
@@ -655,7 +655,7 @@ class Main {
 		Main.gui['menu'].ModifyCol(5, '300')
 	}
 
-	static Reset()
+	static ResetTriggers()
 	{
 		static db := Main.db
 
