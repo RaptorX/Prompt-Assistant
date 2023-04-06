@@ -1,4 +1,4 @@
-#SingleInstance
+﻿#SingleInstance
 
 #Include <SQLite\SQLite3>
 
@@ -197,9 +197,9 @@ class Main {
 		switch Main.lvInfo[id][1]
 		{
 		case 'TXT':
-			ControlSetChecked true, 'Button3', AddGui.gui
-		case 'MENU':
 			ControlSetChecked true, 'Button4', AddGui.gui
+		case 'MENU':
+			ControlSetChecked true, 'Button5', AddGui.gui
 		}
 
 		/**
