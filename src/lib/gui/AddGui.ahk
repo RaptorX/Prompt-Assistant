@@ -1,4 +1,4 @@
-﻿class AddGui {
+class AddGui {
 	static gui         := Gui('+ToolWindow +Owner' Main.gui.hwnd,'Add Item')
 	static editing     := false
 	static placeholder := 'res\ico\002-txt-1.ico'
@@ -127,16 +127,8 @@
 					pos++
 			item[9] := pos
 
-			Main.gui['menu'].Delete(AddGui.editing.row)
-			; if AddGui.editing
-			; {
-			; }
-			; else
-			; {
-			; 	pos := Main.gui['menu'].Add('Icon' Main.Icon.data[item[6]], item*)
-			; 	item[9] := pos
-			; 	main.gui['menu'].Modify(pos, '', item*)
-			; }
+			if AddGui.editing && AddGui.editing.row
+				Main.gui['menu'].Delete(AddGui.editing.row)
 		}
 
 		if saved.type = 2 ; Submenu
@@ -151,7 +143,8 @@
 					'Expand Icon' Main.Icon.data[item[6]]
 				)
 
-				Main.gui['menu'].Delete(AddGui.editing.row)
+				if AddGui.editing.row
+					Main.gui['menu'].Delete(AddGui.editing.row)
 				pos := 0
 				for itemId, row in lvInfo
 				{
