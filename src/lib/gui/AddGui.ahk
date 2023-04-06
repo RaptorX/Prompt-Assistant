@@ -1,4 +1,4 @@
-class AddGui {
+﻿class AddGui {
 	static gui         := Gui('+ToolWindow +Owner' Main.gui.hwnd,'Add Item')
 	static editing     := false
 	static placeholder := 'res\ico\002-txt-1.ico'
@@ -73,8 +73,8 @@ class AddGui {
 			saved.type = 2 ? 'MENU' : 'TXT',
 			AddGui.gui['Label'].Value,
 			Main.HKToString(AddGui.gui['Hotkey'].Value),
-			saved.type = 2 ? '----' : AddGui.gui['Hotstring'].Value,
-			saved.type = 2 ? '--------------------------------------' : AddGui.gui['Snippet'].Value,
+			saved.type = 2 ? '' : AddGui.gui['Hotstring'].Value,
+			saved.type = 2 ? '' : AddGui.gui['Snippet'].Value,
 			AddGui.editing ? AddGui.editing.id : A_Now,
 			parentName := parentInfo.id,
 			AddGui.gui.b64Icon,

@@ -245,24 +245,29 @@ class Main {
 		for id,item in lvInfo
 		{
 			pos := A_Index
-			; Instead a replace from tab to comma i decided to
-			; go on each field to make sure text is escaped
-			; before inserting into the database
+			; Instead a replace from tab to comma for using CSV
+			; i decided to go on each field to make sure the text
+			; is escaped before inserting into the database
 			values := ""
 			for value in item
 			{
 				switch A_Index {
 					case 3:
 						values .= "'" Main.StringToHK(value) "',"
+					case 4:
+						if item[1] = 'MENU'
+							values .= "'',"
+						else
+							values .= "'" SQLite3.Escape(value) "',"
 					default:
 						values .= "'" SQLite3.Escape(value) "',"
-
 				}
 			}
 
 			db.Exec(Format(sql, Trim(values, ',')))
 		}
 		db.Exec('COMMIT TRANSACTION;')
+
 		Main.loadView()
 		Main.LoadMenu()
 
@@ -531,14 +536,14 @@ class Main {
 			; extra := '`t`t🔰 ' sub.hotstring (sub.hotkey && sub.hotstring ? '  ' : '') '💠 ' sub.hotkey
 			switch sub.type
 			{
-			case "MENU":
+			case 'TXT':
+				parent.menu.Add(sub.label '`t' extra, menuHandler)
+				if sub.b64icon
+					parent.menu.SetIcon(sub.label '`t' extra, 'HICON:' HandleFromBase64(sub.b64icon))
+			case 'MENU':
 				Main.menu[sub.id] := sub.menu
 				Main.BuildsmTree(sub)
 				parent.menu.Add(sub.label '`t' extra, sub.menu)
-				if sub.b64icon
-					parent.menu.SetIcon(sub.label '`t' extra, 'HICON:' HandleFromBase64(sub.b64icon))
-			default:
-				parent.menu.Add(sub.label '`t' extra, menuHandler)
 				if sub.b64icon
 					parent.menu.SetIcon(sub.label '`t' extra, 'HICON:' HandleFromBase64(sub.b64icon))
 			}
@@ -598,7 +603,15 @@ class Main {
 			if b64icon := table.cell[A_Index, 'b64icon']
 				icon_index := IL_Add(Main.Icon.list, 'HICON:' HandleFromBase64(b64icon))
 
-			table.rows[A_Index][table.header['hotkey']] := Main.HKToString(table.cell[A_Index, 'hotkey'])
+			table.cell[A_Index, 'hotkey'] := Main.HKToString(table.cell[A_Index, 'hotkey'])
+
+			if table.cell[A_Index, 'type'] = 'MENU'
+			{
+				table.cell[A_Index, 'hotstring'] := '----'
+				table.cell[A_Index, 'Snippet']   := '----------------------------'
+			}
+
+			; table.rows[A_Index][table.header['hotkey']] := Main.HKToString(table.cell[A_Index, 'hotkey'])
 			Main.lvInfo.Set(id, table.rows[A_Index])
 
 			pos := Main.gui['menu'].Add('Icon' (icon_index ?? -1), table.rows[A_Index]*)
@@ -709,6 +722,13 @@ class Main {
 			if row[7] = tvpInfo[tvItem]
 			{
 				icon_index := Main.Icon.data[id]
+
+				if row[1] = 'MENU'
+				{
+					row[4] := '----'
+					row[5] := '----------------------------'
+				}
+
 				pos := Main.gui['menu'].Add('Icon' (icon_index), row*)
 			}
 		}
