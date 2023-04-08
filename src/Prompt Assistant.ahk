@@ -15,8 +15,9 @@ TraySetIcon 'res\ico\PA.ico'
 class Main {
 	static testing       := false
 
-	static menu          := ''
 	static gui           := Gui(unset, 'Prompt Assistant')
+	static menu          := ''
+	static preferences   := {}
 	static LVHeaders     := ['Type', 'Label', 'Hotkey', 'Hotstring', 'Snippet', 'id', 'Parent', 'b64Icon', 'Pos']
 	static lvInfo        := Map()
 	static tvInfo        := Map()
@@ -49,7 +50,8 @@ class Main {
 		CREATE TABLE IF NOT EXISTS items (type INTEGER, label STRING, hotkey STRING, hotstring STRING, snippet STRING, id INTEGER PRIMARY KEY UNIQUE, parent INTEGER, b64icon STRING, pos INTEGER);
 
 		-- Table: preferences
-		CREATE TABLE IF NOT EXISTS preferences ("group" STRING, "key" STRING PRIMARY KEY UNIQUE, value STRING);
+		CREATE TABLE IF NOT EXISTS preferences ("type" INTEGER, "key" STRING PRIMARY KEY UNIQUE, value STRING);
+		INSERT OR IGNORE INTO preferences ("type", "key", value) VALUES (0, "display", 1);
 
 		COMMIT TRANSACTION;
 		PRAGMA foreign_keys = on;'
@@ -59,10 +61,9 @@ class Main {
 
 		A_TrayMenu.Delete()
 		A_TrayMenu.Add('Show Menu`t(Win + RClick)', (*)=> Main.menu["0"].Show())
-		A_TrayMenu.Add('Modify Menu`t(Win + Shift + RClick)', (*)=> Main.gui.show())
+		A_TrayMenu.Add('Customize Menu`t(Win + Shift + RClick)', (*)=> Main.gui.show())
 		A_TrayMenu.Add()
 		A_TrayMenu.AddStandard()
-
 
 		OnMessage(WM_SETCURSOR, ObjBindMethod(Main, 'InfoTooltips'))
 
@@ -138,8 +139,11 @@ class Main {
 			SendMessage BM_SETIMAGE, true,
 			            LoadPicture('C:\WINDOWS\system32\shell32.dll', 'w' btnISize ' h' btnISize ' Icon' icon, &type), ctrl
 
+		Main.LoadPreferences()
+
 		Main.loadView()
 		Main.LoadMenu()
+		Main.LoadMenuBar()
 
 		Main.gui.Show('hide')
 		Main.gui.GetPos(&x, &y)
@@ -147,7 +151,9 @@ class Main {
 		Main.gui.size := Map('x', x, 'y', y, 'width', w-1, 'height', h)
 		Main.gui.diff := Map('x', 0, 'y', 0, 'width', 0  , 'height', 0)
 
-		Main.gui.Show('w' Main.gui.size['width'])
+
+		if Main.preferences.display
+			Main.gui.Show('w' Main.gui.size['width'])
 
 		Hotkey '#RButton', (*)=> Main.menu["0"].Show()
 		Hotkey '#+RButton', (*)=> Main.gui.Show()
@@ -488,6 +494,41 @@ class Main {
 				&& item[6] != parent
 					Main.MarkForDelete(item[6])
 			}
+		}
+	}
+
+	static LoadMenuBar()
+	{
+		Main.gui.MenuBar := MenuBar()
+
+		preferences := Menu()
+		; about       := Menu()
+
+		preferences.Add('Display On Startup', preferencesHandler)
+		; about.Add('Help', menuHandler)
+		; about.Add('About', menuHandler)
+
+		Main.gui.menuBar.Add('Preferences', preferences)
+		; Main.gui.menuBar.Add('About', about)
+
+
+		if Main.preferences.display
+			preferences.Check('Display On Startup')
+
+	}
+
+	static LoadPreferences()
+	{
+		static db := Main.db
+
+		table := db.Exec('SELECT key,value FROM preferences WHERE type=0')
+
+		loop table.nRows
+		{
+			key := table.cell[A_Index, 'key']
+			value := table.cell[A_Index, 'value']
+
+			Main.preferences.%key% := value
 		}
 	}
 
@@ -897,6 +938,21 @@ menuHandler(ItemName, ItemPos, MyMenu)
 	}
 
 	performAction(items.cell[itemRow, 'type'], items.cell[itemRow, 'snippet'])
+}
+
+preferencesHandler(ItemName, ItemPos, MyMenu)
+{
+	static db := Main.db
+
+	switch ItemName
+	{
+	case 'Display On Startup':
+		Main.preferences.display := !Main.preferences.display
+		MyMenu.ToggleCheck(ItemName)
+
+		SQL := 'UPDATE preferences SET value=' Main.preferences.display ' WHERE key="display"'
+		db.Exec(SQL)
+	}
 }
 
 hotstringHandler(trigger)
