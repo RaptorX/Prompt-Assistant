@@ -21,7 +21,7 @@ class Main {
 	static lvInfo        := Map()
 	static tvInfo        := Map()
 	static tvpInfo       := Map()
-	static db            := SQLite3(A_UserName = 'RaptorX' ? 'dataTEST.db' : 'data.db' )
+	static db            := SQLite3(A_UserName = 'RaptorX' ? 'dataTEST.db' : 'data.db', A_IsCompiled ? A_ScriptDir '\lib\Sqlite\bin\sqlite3' (A_PtrSize * 8) '.dll' : unset)
 	static Icon          := {list:IL_Create(10,10), data:Map()}
 	static tmpIcon       := A_Temp '\temp.ico'
 
