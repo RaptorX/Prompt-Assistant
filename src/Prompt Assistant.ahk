@@ -1,4 +1,4 @@
-﻿#SingleInstance
+#SingleInstance
 
 #Include <SQLite\SQLite3>
 
@@ -7,6 +7,7 @@
 
 #Include <Notify>
 #Include <gui\AddGui>
+#Include <gui\preferences>
 
 ; TODO: Export only selected
 
@@ -15,8 +16,9 @@ TraySetIcon 'res\ico\PA.ico'
 class Main {
 	static testing       := false
 
-	static menu          := ''
 	static gui           := Gui(unset, 'Prompt Assistant')
+	static menu          := ''
+	static preferences   := {}
 	static LVHeaders     := ['Type', 'Label', 'Hotkey', 'Hotstring', 'Snippet', 'id', 'Parent', 'b64Icon', 'Pos']
 	static lvInfo        := Map()
 	static tvInfo        := Map()
@@ -49,20 +51,16 @@ class Main {
 		CREATE TABLE IF NOT EXISTS items (type INTEGER, label STRING, hotkey STRING, hotstring STRING, snippet STRING, id INTEGER PRIMARY KEY UNIQUE, parent INTEGER, b64icon STRING, pos INTEGER);
 
 		-- Table: preferences
-		CREATE TABLE IF NOT EXISTS preferences ("group" STRING, "key" STRING PRIMARY KEY UNIQUE, value STRING);
+		CREATE TABLE IF NOT EXISTS preferences ("type" INTEGER, "key" STRING PRIMARY KEY UNIQUE, value STRING);
+		INSERT OR IGNORE INTO preferences ("type", "key", value)
+		VALUES (0, "display", 1),(1, "show_menu", "#RButton"),(1, "customize_menu", "#+RButton");
 
 		COMMIT TRANSACTION;
 		PRAGMA foreign_keys = on;'
 		)
 
 		db.Exec(SQL)
-
-		A_TrayMenu.Delete()
-		A_TrayMenu.Add('Show Menu`t(Win + RClick)', (*)=> Main.menu["0"].Show())
-		A_TrayMenu.Add('Modify Menu`t(Win + Shift + RClick)', (*)=> Main.gui.show())
-		A_TrayMenu.Add()
-		A_TrayMenu.AddStandard()
-
+		Preferences.LoadPreferences()
 
 		OnMessage(WM_SETCURSOR, ObjBindMethod(Main, 'InfoTooltips'))
 
@@ -140,6 +138,8 @@ class Main {
 
 		Main.loadView()
 		Main.LoadMenu()
+		Main.LoadMenuBar()
+		Main.LoadTrayMenu()
 
 		Main.gui.Show('hide')
 		Main.gui.GetPos(&x, &y)
@@ -147,14 +147,25 @@ class Main {
 		Main.gui.size := Map('x', x, 'y', y, 'width', w-1, 'height', h)
 		Main.gui.diff := Map('x', 0, 'y', 0, 'width', 0  , 'height', 0)
 
-		Main.gui.Show('w' Main.gui.size['width'])
 
-		Hotkey '#RButton', (*)=> Main.menu["0"].Show()
-		Hotkey '#+RButton', (*)=> Main.gui.Show()
+		if Main.preferences.display
+			Main.gui.Show('w' Main.gui.size['width'])
 	}
 
 	static Show(options?) => Main.gui.Show(options??'')
 	static Hide() => Main.gui.Hide()
+
+	static LoadTrayMenu()
+	{
+		show_menu := Main.HKToString(Main.preferences.show_menu)
+		customize_menu := Main.HKToString(Main.preferences.customize_menu)
+		
+		A_TrayMenu.Delete()
+		A_TrayMenu.Add('Show Menu`t' show_menu , (*)=> Main.menu["0"].Show())
+		A_TrayMenu.Add('Customize Menu`t' customize_menu, (*)=> Main.gui.show())
+		A_TrayMenu.Add()
+		A_TrayMenu.AddStandard()
+	}
 
 	static BuildTVPath(id)
 	{
@@ -489,6 +500,28 @@ class Main {
 					Main.MarkForDelete(item[6])
 			}
 		}
+	}
+
+	static LoadMenuBar()
+	{
+		Main.gui.MenuBar := MenuBar()
+
+		preferences_menu := Menu()
+		; about       := Menu()
+
+		preferences_menu.Add('Display On Startup', preferencesHandler)
+		preferences_menu.Add()
+		preferences_menu.Add('Hotkeys', (*)=>Preferences.Show())
+		; about.Add('Help', menuHandler)
+		; about.Add('About', menuHandler)
+
+		Main.gui.menuBar.Add('Preferences', preferences_menu)
+		; Main.gui.menuBar.Add('About', about)
+
+
+		if Main.preferences.display
+			preferences_menu.Check('Display On Startup')
+
 	}
 
 	static LoadMenu()
@@ -897,6 +930,21 @@ menuHandler(ItemName, ItemPos, MyMenu)
 	}
 
 	performAction(items.cell[itemRow, 'type'], items.cell[itemRow, 'snippet'])
+}
+
+preferencesHandler(ItemName, ItemPos, MyMenu)
+{
+	static db := Main.db
+
+	switch ItemName
+	{
+	case 'Display On Startup':
+		Main.preferences.display := !Main.preferences.display
+		MyMenu.ToggleCheck(ItemName)
+
+		SQL := 'UPDATE preferences SET value=' Main.preferences.display ' WHERE key="display"'
+		db.Exec(SQL)
+	}
 }
 
 hotstringHandler(trigger)
