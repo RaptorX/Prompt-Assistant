@@ -1,4 +1,4 @@
-﻿#SingleInstance
+#SingleInstance
 
 #Include <SQLite\SQLite3>
 
@@ -7,6 +7,7 @@
 
 #Include <Notify>
 #Include <gui\AddGui>
+#Include <gui\preferences>
 
 ; TODO: Export only selected
 
@@ -51,19 +52,15 @@ class Main {
 
 		-- Table: preferences
 		CREATE TABLE IF NOT EXISTS preferences ("type" INTEGER, "key" STRING PRIMARY KEY UNIQUE, value STRING);
-		INSERT OR IGNORE INTO preferences ("type", "key", value) VALUES (0, "display", 1);
+		INSERT OR IGNORE INTO preferences ("type", "key", value)
+		VALUES (0, "display", 1),(1, "show_menu", "#RButton"),(1, "customize_menu", "#+RButton");
 
 		COMMIT TRANSACTION;
 		PRAGMA foreign_keys = on;'
 		)
 
 		db.Exec(SQL)
-
-		A_TrayMenu.Delete()
-		A_TrayMenu.Add('Show Menu`t(Win + RClick)', (*)=> Main.menu["0"].Show())
-		A_TrayMenu.Add('Customize Menu`t(Win + Shift + RClick)', (*)=> Main.gui.show())
-		A_TrayMenu.Add()
-		A_TrayMenu.AddStandard()
+		Preferences.LoadPreferences()
 
 		OnMessage(WM_SETCURSOR, ObjBindMethod(Main, 'InfoTooltips'))
 
@@ -139,11 +136,10 @@ class Main {
 			SendMessage BM_SETIMAGE, true,
 			            LoadPicture('C:\WINDOWS\system32\shell32.dll', 'w' btnISize ' h' btnISize ' Icon' icon, &type), ctrl
 
-		Main.LoadPreferences()
-
 		Main.loadView()
 		Main.LoadMenu()
 		Main.LoadMenuBar()
+		Main.LoadTrayMenu()
 
 		Main.gui.Show('hide')
 		Main.gui.GetPos(&x, &y)
@@ -154,13 +150,22 @@ class Main {
 
 		if Main.preferences.display
 			Main.gui.Show('w' Main.gui.size['width'])
-
-		Hotkey '#RButton', (*)=> Main.menu["0"].Show()
-		Hotkey '#+RButton', (*)=> Main.gui.Show()
 	}
 
 	static Show(options?) => Main.gui.Show(options??'')
 	static Hide() => Main.gui.Hide()
+
+	static LoadTrayMenu()
+	{
+		show_menu := Main.HKToString(Main.preferences.show_menu)
+		customize_menu := Main.HKToString(Main.preferences.customize_menu)
+		
+		A_TrayMenu.Delete()
+		A_TrayMenu.Add('Show Menu`t' show_menu , (*)=> Main.menu["0"].Show())
+		A_TrayMenu.Add('Customize Menu`t' customize_menu, (*)=> Main.gui.show())
+		A_TrayMenu.Add()
+		A_TrayMenu.AddStandard()
+	}
 
 	static BuildTVPath(id)
 	{
@@ -501,35 +506,22 @@ class Main {
 	{
 		Main.gui.MenuBar := MenuBar()
 
-		preferences := Menu()
+		preferences_menu := Menu()
 		; about       := Menu()
 
-		preferences.Add('Display On Startup', preferencesHandler)
+		preferences_menu.Add('Display On Startup', preferencesHandler)
+		preferences_menu.Add()
+		preferences_menu.Add('Hotkeys', (*)=>Preferences.Show())
 		; about.Add('Help', menuHandler)
 		; about.Add('About', menuHandler)
 
-		Main.gui.menuBar.Add('Preferences', preferences)
+		Main.gui.menuBar.Add('Preferences', preferences_menu)
 		; Main.gui.menuBar.Add('About', about)
 
 
 		if Main.preferences.display
-			preferences.Check('Display On Startup')
+			preferences_menu.Check('Display On Startup')
 
-	}
-
-	static LoadPreferences()
-	{
-		static db := Main.db
-
-		table := db.Exec('SELECT key,value FROM preferences WHERE type=0')
-
-		loop table.nRows
-		{
-			key := table.cell[A_Index, 'key']
-			value := table.cell[A_Index, 'value']
-
-			Main.preferences.%key% := value
-		}
 	}
 
 	static LoadMenu()
