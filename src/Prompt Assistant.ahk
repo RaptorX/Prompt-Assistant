@@ -1,4 +1,4 @@
-#SingleInstance
+﻿#SingleInstance
 
 #Include <SQLite\SQLite3>
 
@@ -883,6 +883,14 @@ class Main {
 			return ToolTip('Move selected item Up')
 		case Main.gui['MoveDown'].hwnd:
 			return ToolTip('Move selected item Down')
+		case AddGui.gui['MenuLabel'].hwnd: ; , AddGui.gui['Label'].hwnd:
+			return ToolTip('Label or Name that will show up in the Prompt Assistant Menu')
+		case AddGui.gui['HKLabel'].hwnd: ; , AddGui.gui['Hotkey'].hwnd:
+			return ToolTip('Hotkey that will send the snippet to the active window')
+		case AddGui.gui['HSLabel'].hwnd: ; , AddGui.gui['Hotstring'].hwnd:
+			return ToolTip('Short text that will be expanded to the snippet below')
+		case AddGui.gui['SnipLabel'].hwnd: ; , AddGui.gui['Hotstring'].hwnd:
+			return ToolTip('Text that will be sent to the active window')
 		}
 		ToolTip
 	}
