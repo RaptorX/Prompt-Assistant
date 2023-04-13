@@ -1,0 +1,9 @@
+[submodule "src/lib/SQLite"]
+	path = src/lib/SQLite
+	url = D:\\Cloud\\RaptorX\\OneDrive\\Documents\\AutoHotkey\\lib\\SQLite
+[submodule "src/lib/Base64"]
+	path = src/lib/Base64
+	url = D:\\Cloud\\RaptorX\\OneDrive\\Documents\\AutoHotkey\\lib\\Base64
+[submodule "src/lib/HandleFromBase64"]
+	path = src/lib/HandleFromBase64
+	url = D:\\Cloud\\RaptorX\\OneDrive\\Documents\\AutoHotkey\\lib\\HandleFromBase64
