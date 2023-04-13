@@ -187,8 +187,10 @@ class Main {
 
 	static Add(button)
 	{
+		AddGui.editing := false
 		AddGui.gui['AddBtn'].text := 'Add'
 		AddGui.gui['Icon'].value := AddGui.placeholder
+		ControlSetChecked true, 'Button4', AddGui.gui
 
 		AddGui.gui.b64Icon := ''
 		AddGui.gui['Label'].value := ''
@@ -222,22 +224,21 @@ class Main {
 			ControlSetChecked true, 'Button5', AddGui.gui
 		}
 
-		/**
-		Using ControlSetChecked below triggers the Event associated with
-		the radio buttons, so we need to make sure that the icons are set
-		prior to that event handler being called
-		 */
-		b64icon := Main.lvInfo[id][8]
-		if b64icon
+		values := AddGui.gui.Submit(false)
+		if b64icon := Main.lvInfo[AddGui.editing.id][8]
 		{
 			try FileDelete Main.tmpIcon
 			FileAppend B64Decode(b64icon, 'RAW'), Main.tmpIcon
 			AddGui.gui['Icon'].value := Main.tmpIcon ; 'HBITMAP:' HandleFromBase64(b64icon, false)
+			icoPath := Main.tmpIcon
 		}
 		else
-			AddGui.gui['Icon'].value := AddGui.placeholder
+			icoPath := values.Type = 1 ? 'res\ico\002-txt-1.ico' : 'res\ico\arrow.ico'
+			
+		rawData := FileRead(icoPath, 'RAW')
+		AddGui.gui['Icon'].value := icoPath
+		AddGui.gui.b64Icon := B64Encode(rawData, 'RAW')
 
-		AddGui.gui.b64Icon := b64icon
 		AddGui.gui['Label'].value := Main.lvInfo[id][2]
 		AddGui.gui['Hotkey'].value := Main.lvInfo[id][3]
 		AddGui.gui['Hotstring'].value := Main.lvInfo[id][4]

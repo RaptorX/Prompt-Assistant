@@ -7,7 +7,7 @@
 	{
 		basicWidth  := 500
 		basicBtnLoc := basicWidth + AddGui.gui.MarginX * 2 - (75 * 2)
-	
+
 		AddGui.gui.b64Icon := ''
 		AddGui.gui.AddGroupBox('x+' (basicWidth/2) - (75/2) ' ym w75 r3.5 Section','Icon')
 		AddGui.gui.AddPicture('vIcon xp+6 yp+17 w64 h-1', AddGui.placeholder)
@@ -21,14 +21,14 @@
 		lblYMargin := AddGui.gui.MarginY+6
 		lblXMargin := AddGui.gui.MarginX*2
 		AddGui.gui.AddGroupBox('xm w' basicWidth + AddGui.gui.MarginX*2 ' r5', 'General Info')
-		AddGui.gui.AddText('xp+10 yp+20', 'Label:')
+		AddGui.gui.AddText('vMenuLabel xp+10 yp+20', 'Menu Label:')
 		AddGui.gui.AddEdit('vLabel x+60 yp-3 w150 Section')
 		AddGui.gui.AddText('vHKLabel x' lblXMargin ' y+' lblYMargin, 'Hotkey:')
 		AddGui.gui.AddHotkey('vHotkey xs yp-3 w150')
-		AddGui.gui.AddText('vHSLabel x' lblXMargin ' y+' lblYMargin, 'Text Expansion:')
+		AddGui.gui.AddText('vHSLabel x' lblXMargin ' y+' lblYMargin, 'Hotstring:')
 		AddGui.gui.AddEdit('vHotstring xs yp-3 w150')
 
-		AddGui.gui.AddGroupBox('xm w' basicWidth + AddGui.gui.MarginX*2 ' r7.5', 'Snippet')
+		AddGui.gui.AddGroupBox('vSnipLabel xm w' basicWidth + AddGui.gui.MarginX*2 ' r7.5', 'Snippet')
 		AddGui.gui.AddEdit('vSnippet xp+10 yp+15 w' basicWidth ' r10')
 		AddGui.gui.AddButton('vAddBtn x' basicBtnLoc ' w75', 'Add')
 		          .OnEvent('Click', (*)=>AddGui.Save())
@@ -145,16 +145,16 @@
 
 				SQL := "SELECT id,label,parent,b64icon FROM items WHERE type='MENU' "
 				    .  "AND parent=" AddGui.editing.id " ORDER BY parent,pos ASC"
-				
+
 				try table := db.Exec(SQL)
 				catch
 					throw Error(db.errMsg, A_ThisFunc)
-				
+
 				Main.LoadTree(table, tvID)
-				
+
 				if AddGui.editing.row
 					Main.gui['menu'].Delete(AddGui.editing.row)
-				
+
 				pos := 0
 				for itemId, row in Main.lvInfo
 					if row[7] = item[7]
@@ -207,39 +207,33 @@
 		switch values.Type
 		{
 		case 1:
-			if AddGui.gui.b64Icon
-				icoPath := Main.tmpIcon
-			else
-				icoPath := 'res\ico\002-txt-1.ico'
 			for ctrl in AddGui.gui
-			{
-				switch ctrl.Name
-				{
-				case 'snippet',
-				     'BrowseFile','BrowseFolder':
-					ctrl.Enabled := false
-				default:
-					ctrl.Enabled := true
-				}
-			}
+				ctrl.Enabled := true
 		case 2:
-			if AddGui.gui.b64Icon
-				icoPath := Main.tmpIcon
-			else
-				icoPath := 'res\ico\arrow.ico'
 			for ctrl in AddGui.gui
 			{
 				switch ctrl.Name
 				{
-				case 'snippet','BrowseFile',
-				     'BrowseFolder','HSLabel','Hotstring',
-				     'Snippet':
+				case 'HKLabel','Hotkey','HSLabel','Hotstring','Snippet':
+					if !(ctrl.Name ~= 'H(K|S)Label')
+						ctrl.Value := ''
 					ctrl.Enabled := false
 				default:
 					ctrl.Enabled := true
 				}
 			}
 		}
+
+		if AddGui.editing
+		&& b64icon := Main.lvInfo[AddGui.editing.id][8]
+		{
+			try FileDelete Main.tmpIcon
+			FileAppend B64Decode(b64icon, 'RAW'), Main.tmpIcon
+			AddGui.gui['Icon'].value := Main.tmpIcon ; 'HBITMAP:' HandleFromBase64(b64icon, false)
+			icoPath := Main.tmpIcon
+		}
+		else
+			icoPath := values.Type = 1 ? 'res\ico\002-txt-1.ico' : 'res\ico\arrow.ico'
 
 		rawData := FileRead(icoPath, 'RAW')
 		AddGui.gui['Icon'].value := icoPath
