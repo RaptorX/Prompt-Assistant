@@ -97,11 +97,13 @@ class Main {
 			                 . ' h' btnISize + 12
 			                 . ' +' BS_ICON)
 
-		basicBtnLoc := tvWidth + lvWidth - (75 * 2)
+		basicBtnLoc := tvWidth + lvWidth - (75 * 2) - 110 - 10
 		Main.gui.AddButton('xm w75 h' btnISize + 12, 'Import').OnEvent('Click', (*)=>Main.Import())
 		Main.gui.AddButton('x+m w75 h' btnISize + 12, 'Export').OnEvent('Click', (*)=>Main.Export())
 
 		Main.gui.AddButton('x' basicBtnLoc ' yp  w75 h' btnISize + 12, 'Save').OnEvent('Click', (*)=>Main.Save())
+		Main.gui.AddButton('x+m w110 h' btnISize + 12, 'Save && Close')
+		        .OnEvent('Click', (*)=>(Main.gui.Hide(), Main.Save()))
 		Main.gui.AddButton('x+m w75 h' btnISize + 12, 'Cancel').OnEvent('Click', (*)=>Main.Cancel())
 
 		Main.gui['Add'].OnEvent('Click', (obj,info)=>Main.Add(obj))
@@ -128,14 +130,20 @@ class Main {
 		hIcon := LoadPicture("C:\WINDOWS\system32\shell32.dll", "Icon297", &imgType)
 		hIcon := LoadPicture("C:\WINDOWS\system32\shell32.dll", "Icon132", &imgType)
 
+
 		btnIcons := Map(
-			297, Main.gui['Save'],
-			132, Main.gui['Cancel'],
+			Main.gui['Save'], 297,
+			Main.gui['Cancel'], 132,
 		)
 
-		for icon,ctrl in btnIcons
+		for ctrl,icon in btnIcons
 			SendMessage BM_SETIMAGE, true,
 			            LoadPicture('C:\WINDOWS\system32\shell32.dll', 'w' btnISize ' h' btnISize ' Icon' icon, &type), ctrl
+		
+		SendMessage BM_SETIMAGE,
+		            true,
+		            LoadPicture('C:\WINDOWS\system32\comres.dll', 'w' btnISize ' h' btnISize ' Icon5', &type),
+			    Main.gui['Save && Close']
 
 		Main.loadView()
 		Main.LoadMenu()
