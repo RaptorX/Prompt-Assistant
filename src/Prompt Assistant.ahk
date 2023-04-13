@@ -12,6 +12,7 @@
 ; TODO: Export only selected
 
 TraySetIcon 'res\ico\PA.ico'
+OnMessage(WM_SETCURSOR := 0x0020, ObjBindMethod(Main, 'InfoTooltips'))
 
 class Main {
 	static testing       := false
@@ -36,7 +37,6 @@ class Main {
 		static BS_ICON     := 0x40
 		static BS_FLAT     := 0x8000
 		static BM_SETIMAGE := 0xF7
-		static WM_SETCURSOR := 0x0020
 
 		SQL :=
 		(
@@ -62,8 +62,6 @@ class Main {
 
 		db.Exec(SQL)
 		Preferences.loadHotkeys()
-
-		OnMessage(WM_SETCURSOR, ObjBindMethod(Main, 'InfoTooltips'))
 
 		lvWidth := 650
 		tvWidth := lvWidth / 4
