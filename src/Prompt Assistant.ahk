@@ -172,6 +172,7 @@ class Main {
 		A_TrayMenu.Delete()
 		A_TrayMenu.Add('Show Menu`t' show_menu , (*)=> Main.menu["0"].Show())
 		A_TrayMenu.Add('Customize Menu`t' customize_menu, (*)=> Main.gui.show())
+		A_TrayMenu.Add('Hotkeys', (*)=>Preferences.Show())
 		A_TrayMenu.Add()
 		A_TrayMenu.AddStandard()
 	}
