@@ -1,4 +1,19 @@
 ﻿#SingleInstance
+#Requires Autohotkey v2.0-
+;--
+;@Ahk2Exe-SetVersion     0.12.0
+;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
+;@Ahk2Exe-SetProductName Prompt Assistant
+;@Ahk2Exe-SetDescription Quick snippet creator for general purposes
+/**
+ * ============================================================================ *
+ * @Author   : Isaias Baez                                                      *
+ * @Homepage :                                                                  *
+ *                                                                              *
+ * @Created  : April 1, 2023                                                    *
+ * @Modified : April 14, 2023                                                   *
+ * ============================================================================ *
+ */
 
 #Include <SQLite\SQLite3>
 
@@ -24,7 +39,7 @@ class Main {
 	static lvInfo        := Map()
 	static tvInfo        := Map()
 	static tvpInfo       := Map()
-	static db            := SQLite3(A_UserName = 'RaptorX' ? 'dataTEST.db' : 'data.db', 
+	static db            := SQLite3(A_UserName = 'RaptorX' ? 'dataTEST.db' : 'data.db',
 	                                A_IsCompiled ? A_ScriptDir '\lib\Sqlite\bin\sqlite3' (A_PtrSize * 8) '.dll' : unset)
 	static Icon          := {list:IL_Create(10,10), data:Map()}
 	static tmpIcon       := A_Temp '\temp.ico'
@@ -54,7 +69,7 @@ class Main {
 		-- Table: preferences
 		CREATE TABLE IF NOT EXISTS preferences ("type" INTEGER, "key" STRING PRIMARY KEY UNIQUE, value STRING);
 		INSERT OR IGNORE INTO preferences ("type", "key", value)
-		VALUES (0, "display", 1),(1, "show_menu", "#RButton"),(1, "customize_menu", "#+RButton");
+		VALUES (0, "display", 1),(0, "tooltips", 1),(1, "show_menu", "#LButton"),(1, "customize_menu", "#+LButton");
 
 		COMMIT TRANSACTION;
 		PRAGMA foreign_keys = on;'
@@ -137,7 +152,7 @@ class Main {
 		for ctrl,icon in btnIcons
 			SendMessage BM_SETIMAGE, true,
 			            LoadPicture('C:\WINDOWS\system32\shell32.dll', 'w' btnISize ' h' btnISize ' Icon' icon, &type), ctrl
-		
+
 		SendMessage BM_SETIMAGE,
 		            true,
 		            LoadPicture('C:\WINDOWS\system32\comres.dll', 'w' btnISize ' h' btnISize ' Icon5', &type),
@@ -166,7 +181,7 @@ class Main {
 	{
 		show_menu := Main.HKToString(Main.preferences.show_menu)
 		customize_menu := Main.HKToString(Main.preferences.customize_menu)
-		
+
 		A_TrayMenu.Delete()
 		A_TrayMenu.Add('Show Menu`t' show_menu , (*)=> Main.menu["0"].Show())
 		A_TrayMenu.Add('Customize Menu`t' customize_menu, (*)=> Main.gui.show())
@@ -233,7 +248,7 @@ class Main {
 		}
 		else
 			icoPath := values.Type = 1 ? 'res\ico\002-txt-1.ico' : 'res\ico\arrow.ico'
-			
+
 		rawData := FileRead(icoPath, 'RAW')
 		AddGui.gui['Icon'].value := icoPath
 		AddGui.gui.b64Icon := B64Encode(rawData, 'RAW')
@@ -519,6 +534,7 @@ class Main {
 		; about       := Menu()
 
 		preferences_menu.Add('Display On Startup', preferencesHandler)
+		preferences_menu.Add('Show Tooltips', preferencesHandler)
 		preferences_menu.Add()
 		preferences_menu.Add('Hotkeys', (*)=>Preferences.Show())
 		; about.Add('Help', menuHandler)
@@ -530,6 +546,8 @@ class Main {
 
 		if Main.preferences.display
 			preferences_menu.Check('Display On Startup')
+		if Main.preferences.tooltips
+			preferences_menu.Check('Show Tooltips')
 
 	}
 
@@ -867,6 +885,9 @@ class Main {
 
 	static InfoTooltips(wParam, lParam, msg, hwnd)
 	{
+		if !Main.preferences.tooltips
+			return
+
 		MouseGetPos ,,,&hwnd, 2
 
 		switch hwnd
@@ -913,7 +934,7 @@ class Main {
 		for mod in temphk
 			fixedMods .= mod
 
-		return fixedMods StrUpper(hk)
+		return fixedMods ?? '' StrUpper(hk)
 	}
 
 	static StringToHK(str)
@@ -960,6 +981,12 @@ preferencesHandler(ItemName, ItemPos, MyMenu)
 		MyMenu.ToggleCheck(ItemName)
 
 		SQL := 'UPDATE preferences SET value=' Main.preferences.display ' WHERE key="display"'
+		db.Exec(SQL)
+	case 'Show Tooltips':
+		Main.preferences.tooltips := !Main.preferences.tooltips
+		MyMenu.ToggleCheck(ItemName)
+
+		SQL := 'UPDATE preferences SET value=' Main.preferences.tooltips ' WHERE key="tooltips"'
 		db.Exec(SQL)
 	}
 }
