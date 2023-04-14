@@ -3,8 +3,8 @@
 ;--
 ;@Ahk2Exe-SetVersion     0.12.0
 ;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
-;@Ahk2Exe-SetProductName
-;@Ahk2Exe-SetDescription
+;@Ahk2Exe-SetProductName Prompt Assistant
+;@Ahk2Exe-SetDescription Quick snippet creator for general purposes
 /**
  * ============================================================================ *
  * @Author   : Isaias Baez                                                      *
