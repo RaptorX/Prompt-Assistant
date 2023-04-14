@@ -1,7 +1,7 @@
 ﻿#SingleInstance
 #Requires Autohotkey v2.0-
 ;--
-;@Ahk2Exe-SetVersion     0.10.9
+;@Ahk2Exe-SetVersion     0.12.0
 ;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
 ;@Ahk2Exe-SetProductName
 ;@Ahk2Exe-SetDescription
