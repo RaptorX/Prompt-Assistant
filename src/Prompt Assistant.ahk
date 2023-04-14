@@ -1,4 +1,19 @@
 ﻿#SingleInstance
+#Requires Autohotkey v2.0-
+;--
+;@Ahk2Exe-SetVersion     0.10.9
+;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
+;@Ahk2Exe-SetProductName
+;@Ahk2Exe-SetDescription
+/**
+ * ============================================================================ *
+ * @Author   : Isaias Baez                                                      *
+ * @Homepage :                                                                  *
+ *                                                                              *
+ * @Created  : April 1, 2023                                                    *
+ * @Modified : April 14, 2023                                                   *
+ * ============================================================================ *
+ */
 
 #Include <SQLite\SQLite3>
 
