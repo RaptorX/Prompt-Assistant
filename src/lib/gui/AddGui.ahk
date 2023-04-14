@@ -85,10 +85,10 @@
 		{
 			switch saved.type
 			{
-				case 1:
-					icoPath := 'res\ico\002-txt-1.ico'
-				case 2:
-					icoPath := 'res\ico\arrow.ico'
+			case 1:
+				icoPath := 'res\ico\002-txt-1.ico'
+			case 2:
+				icoPath := 'res\ico\arrow.ico'
 			}
 			rawData := FileRead(icoPath, 'RAW')
 			AddGui.gui.b64Icon := B64Encode(rawData, 'RAW')

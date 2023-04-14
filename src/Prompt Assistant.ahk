@@ -913,7 +913,7 @@ class Main {
 		for mod in temphk
 			fixedMods .= mod
 
-		return fixedMods StrUpper(hk)
+		return fixedMods ?? '' StrUpper(hk)
 	}
 
 	static StringToHK(str)
