@@ -1,7 +1,7 @@
 ﻿#SingleInstance
 #Requires Autohotkey v2.0-
 ;--
-;@Ahk2Exe-SetVersion     0.12.0
+;@Ahk2Exe-SetVersion     0.12.1
 ;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
 ;@Ahk2Exe-SetProductName Prompt Assistant
 ;@Ahk2Exe-SetDescription Quick snippet creator for general purposes
@@ -254,7 +254,7 @@ class Main {
 		AddGui.gui.b64Icon := B64Encode(rawData, 'RAW')
 
 		AddGui.gui['Label'].value := Main.lvInfo[id][2]
-		AddGui.gui['Hotkey'].value := Main.lvInfo[id][3]
+		AddGui.gui['Hotkey'].value := StrLower(Main.lvInfo[id][3])
 		AddGui.gui['Hotstring'].value := Main.lvInfo[id][4]
 		AddGui.gui['Snippet'].value := SQLite3.UnEscape(Main.lvInfo[id][5])
 		AddGui.Show(button)
@@ -287,15 +287,15 @@ class Main {
 			for value in item
 			{
 				switch A_Index {
-					case 3:
-						values .= "'" Main.StringToHK(value) "',"
-					case 4:
-						if item[1] = 'MENU'
-							values .= "'',"
-						else
-							values .= "'" SQLite3.Escape(value) "',"
-					default:
+				case 3:
+					values .= "'" Main.StringToHK(value) "',"
+				case 4:
+					if item[1] = 'MENU'
+						values .= "'',"
+					else
 						values .= "'" SQLite3.Escape(value) "',"
+				default:
+					values .= "'" SQLite3.Escape(value) "',"
 				}
 			}
 
