@@ -1,7 +1,9 @@
-﻿#SingleInstance
+﻿; todo: add search functionality
+; todo: add check for duplicate snippets functionality
+#SingleInstance
 #Requires Autohotkey v2.0-
 ;--
-;@Ahk2Exe-SetVersion     0.12.1
+;@Ahk2Exe-SetVersion     0.12.2
 ;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
 ;@Ahk2Exe-SetProductName Prompt Assistant
 ;@Ahk2Exe-SetDescription Quick snippet creator for general purposes
@@ -85,7 +87,7 @@ class Main {
 		Main.gui.SetFont('', 'Arial')
 		Main.gui.AddTreeView('vsmTree w' tvWidth ' h400 -Buttons')
 		Main.gui.SetFont()
-		Main.gui['smTree'].OnEvent('Click', (obj,info)=>Main.TVSelect(info))
+		Main.gui['smTree'].OnEvent('ItemSelect', (obj,info)=>Main.TVSelect(info))
 		Main.gui['smTree'].SetImageList(Main.Icon.list)
 
 		Main.gui.AddText('x+-1 ys', 'Items:')
@@ -93,7 +95,7 @@ class Main {
 		Main.gui.AddListView('vmenu w' lvWidth ' h400', Main.LVHeaders)
 		Main.gui.SetFont()
 		Main.gui['menu'].SetImageList(Main.Icon.list)
-		Main.gui['menu'].OnEvent('Click', (*)=>Main.SetButtonStatus())
+		Main.gui['menu'].OnEvent('ItemSelect', (*)=>Main.SetButtonStatus())
 		Main.gui['menu'].OnEvent('DoubleClick', (*)=>Main.SelectEdit())
 
 		IL_Add(Main.Icon.list, 'C:\WINDOWS\system32\imageres.dll', 76)
