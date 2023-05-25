@@ -3,7 +3,7 @@
 #SingleInstance
 #Requires Autohotkey v2.0-
 ;--
-;@Ahk2Exe-SetVersion     0.12.1
+;@Ahk2Exe-SetVersion     0.12.2
 ;@Ahk2Exe-SetMainIcon    res\ico\PA.ico
 ;@Ahk2Exe-SetProductName Prompt Assistant
 ;@Ahk2Exe-SetDescription Quick snippet creator for general purposes
